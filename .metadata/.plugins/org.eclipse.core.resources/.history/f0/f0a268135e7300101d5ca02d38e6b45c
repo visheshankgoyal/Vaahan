@@ -1,0 +1,5 @@
+package com.vaahan.config;
+
+public class CorsConfig {
+
+}
