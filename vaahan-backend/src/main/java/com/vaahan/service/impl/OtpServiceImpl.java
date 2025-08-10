@@ -49,11 +49,20 @@ public class OtpServiceImpl implements OtpService {
 
     @Override
     public boolean verifyOtp(String username, String otpCode) {
+        logger.info("Verifying OTP for username: {} with code: {}", username, otpCode);
+        
         return otpRepository.findByUsernameAndOtpCode(username, otpCode)
-                .filter(o -> o.getExpirationTime().isAfter(LocalDateTime.now()) && !o.isVerified())
+                .filter(o -> {
+                    boolean notExpired = o.getExpirationTime().isAfter(LocalDateTime.now());
+                    boolean notVerified = !o.isVerified();
+                    logger.info("OTP found - Expired: {}, Verified: {}, Valid: {}", 
+                              !notExpired, o.isVerified(), notExpired && notVerified);
+                    return notExpired && notVerified;
+                })
                 .map(o -> {
                     o.setVerified(true);
                     otpRepository.save(o);
+                    logger.info("OTP verified successfully for username: {}", username);
                     return true;
                 }).orElse(false);
     }

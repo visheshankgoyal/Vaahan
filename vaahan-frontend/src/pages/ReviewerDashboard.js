@@ -21,15 +21,41 @@ const ReviewerDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, reportsRes] = await Promise.all([
-        api.get("/reviewer/stats"),
-        api.get("/reviewer/pending-reports")
-      ]);
+      // For now, we'll use mock data since the API endpoints don't exist yet
+      // TODO: Replace with actual API calls when endpoints are implemented
       
-      setStats(statsRes.data);
-      setPendingReports(reportsRes.data);
+      // Mock data for demonstration
+      const mockStats = {
+        totalAssigned: 0,
+        pendingReviews: 0,
+        completedToday: 0,
+        averageReviewTime: 0
+      };
+      
+      const mockPendingReports = [];
+      
+      setStats(mockStats);
+      setPendingReports(mockPendingReports);
+      
+      // Uncomment when API endpoints are ready:
+      // const [statsRes, reportsRes] = await Promise.all([
+      //   api.get("/reviewer/stats"),
+      //   api.get("/reviewer/pending-reports")
+      // ]);
+      // setStats(statsRes.data.data || statsRes.data);
+      // setPendingReports(reportsRes.data.data || reportsRes.data);
+      
     } catch (err) {
-      toast.error("Failed to load dashboard data");
+      console.error("Dashboard data fetch error:", err);
+      // Set default values on error
+      setStats({
+        totalAssigned: 0,
+        pendingReviews: 0,
+        completedToday: 0,
+        averageReviewTime: 0
+      });
+      setPendingReports([]);
+      toast.error("Failed to load dashboard data. Using default values.");
     } finally {
       setLoading(false);
     }

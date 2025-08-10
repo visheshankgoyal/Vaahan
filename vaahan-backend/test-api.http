@@ -1,0 +1,68 @@
+### Test API Endpoints for VAAHAN Backend
+
+### 1. Health Check
+GET http://localhost:8080/actuator/health
+
+### 2. Swagger Documentation
+GET http://localhost:8080/swagger-ui.html
+
+### 3. Generate OTP
+POST http://localhost:8080/api/otp/generate
+Content-Type: application/x-www-form-urlencoded
+
+username=test@example.com
+
+### 4. Fetch OTP (for testing)
+POST http://localhost:8080/api/otp/fetch-otp
+Content-Type: application/x-www-form-urlencoded
+
+username=test@example.com
+
+### 5. Verify OTP
+POST http://localhost:8080/api/otp/verify
+Content-Type: application/x-www-form-urlencoded
+
+username=test@example.com&otp=123456
+
+### 6. User Registration
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123",
+  "firstName": "Test",
+  "lastName": "User",
+  "phone": "1234567890"
+}
+
+### 7. User Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+
+### 8. Verify OTP (JSON)
+POST http://localhost:8080/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "otp": "123456"
+}
+
+### 9. Resend OTP
+POST http://localhost:8080/api/auth/resend-otp
+Content-Type: application/json
+
+{
+  "username": "testuser"
+}
+
+### 10. Get All Users (Admin - requires authentication)
+GET http://localhost:8080/api/admin/users
+Authorization: Bearer YOUR_JWT_TOKEN_HERE 

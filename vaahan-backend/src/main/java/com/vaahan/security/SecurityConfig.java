@@ -52,11 +52,12 @@ public class SecurityConfig {
                     "/api/otp/**",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
-                    "/actuator/**"
+                    "/actuator/**",
+                    "/error"
                 ).permitAll()
-                .requestMatchers("/api/user/**", "/api/vcoins/**").hasAnyAuthority("USER", "ADMIN")
-                .requestMatchers("/api/reviewer/**").hasAuthority("REVIEWER")
-                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/user/**", "/api/vcoins/**").hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .requestMatchers("/api/reviewer/**").hasAuthority("ROLE_REVIEWER")
+                .requestMatchers("/api/admin/**").hasAuthority("ROLE_ADMIN")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
@@ -89,6 +90,7 @@ public class SecurityConfig {
         
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L); // 1 hour
+        configuration.addExposedHeader("Authorization");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

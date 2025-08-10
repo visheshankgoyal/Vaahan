@@ -23,16 +23,65 @@ const Login = () => {
     
     try {
       const res = await api.post("/auth/login", credentials);
-      // Backend returns { data: { success, message, data: { token } } }
-      const token = res.data.data.token;
-      // Optionally, fetch user info here or decode from token if needed
-      // For now, just store token and navigate
-      login({ username: credentials.username }, token);
-      toast.success("Login successful!");
-      // Navigate to dashboard (role-based navigation can be added if user info is available)
-      navigate("/dashboard");
+      
+      if (res.data.success) {
+        const token = res.data.data.token;
+        const userData = {
+          username: credentials.username,
+          // You can decode the JWT token to get user role and other info
+          // For now, we'll fetch user details separately if needed
+        };
+        
+        login(userData, token);
+        toast.success("Login successful!");
+        
+        // Decode JWT token to get user role and redirect accordingly
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          
+          const decodedToken = JSON.parse(jsonPayload);
+          let userRole = "USER"; // Default role
+          
+          if (decodedToken.authorities && decodedToken.authorities.length > 0) {
+            const roleAuthority = decodedToken.authorities.find(auth => 
+              auth.authority && auth.authority.startsWith('ROLE_')
+            );
+            if (roleAuthority) {
+              userRole = roleAuthority.authority.replace('ROLE_', '');
+            }
+          }
+          
+          // Redirect based on user role
+          switch (userRole) {
+            case 'ADMIN':
+              navigate("/admin");
+              break;
+            case 'REVIEWER':
+              navigate("/reviewer");
+              break;
+            case 'USER':
+            default:
+              navigate("/dashboard");
+              break;
+          }
+        } catch (tokenError) {
+          console.error("Error decoding token:", tokenError);
+          // Fallback to default dashboard
+          navigate("/dashboard");
+        }
+      } else {
+        toast.error(res.data.message || "Login failed");
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed. Please check your credentials.");
+      console.error("Login error:", err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          "Login failed. Please check your credentials.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -47,40 +96,21 @@ const Login = () => {
               <div className="text-center mb-4">
                 <i className="fas fa-sign-in-alt fa-3x text-primary mb-3"></i>
                 <h2 className="card-title">Login to VAAHAN</h2>
-                <p className="text-muted">Choose your role and sign in</p>
+                <p className="text-muted">Enter your credentials to access your account</p>
               </div>
               
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label htmlFor="role">
-                    <i className="fas fa-user-tag mr-1"></i>
-                    Login As
-                  </label>
-                  <select
-                    className="form-control"
-                    id="role"
-                    name="role"
-                    value={credentials.role}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="USER">👤 Citizen User</option>
-                    <option value="REVIEWER">🔍 Traffic Reviewer</option>
-                    <option value="ADMIN">⚙️ System Administrator</option>
-                  </select>
-                </div>
-
-                <div className="form-group">
                   <label htmlFor="username">
                     <i className="fas fa-user mr-1"></i>
-                    Username
+                    Username or Email
                   </label>
                   <input
                     type="text"
                     className="form-control"
                     id="username"
                     name="username"
-                    placeholder="Enter your username"
+                    placeholder="Enter your username or email"
                     value={credentials.username}
                     onChange={handleChange}
                     required
@@ -135,7 +165,7 @@ const Login = () => {
 
               {/* Role Information */}
               <div className="mt-4">
-                <h6 className="text-muted">Role Information:</h6>
+                <h6 className="text-muted">Account Types:</h6>
                 <div className="small">
                   <div className="mb-2">
                     <strong>👤 Citizen User:</strong> Report traffic violations and track your reports

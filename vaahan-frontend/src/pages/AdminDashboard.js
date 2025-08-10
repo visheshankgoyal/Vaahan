@@ -21,15 +21,41 @@ const AdminDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, reportsRes] = await Promise.all([
-        api.get("/admin/stats"),
-        api.get("/admin/reports/recent")
-      ]);
+      // For now, we'll use mock data since the API endpoints don't exist yet
+      // TODO: Replace with actual API calls when endpoints are implemented
       
-      setStats(statsRes.data);
-      setRecentReports(reportsRes.data);
+      // Mock data for demonstration
+      const mockStats = {
+        totalReports: 0,
+        pendingReports: 0,
+        totalUsers: 0,
+        totalReviewers: 0
+      };
+      
+      const mockRecentReports = [];
+      
+      setStats(mockStats);
+      setRecentReports(mockRecentReports);
+      
+      // Uncomment when API endpoints are ready:
+      // const [statsRes, reportsRes] = await Promise.all([
+      //   api.get("/admin/stats"),
+      //   api.get("/admin/reports/recent")
+      // ]);
+      // setStats(statsRes.data.data || statsRes.data);
+      // setRecentReports(reportsRes.data.data || reportsRes.data);
+      
     } catch (err) {
-      toast.error("Failed to load dashboard data");
+      console.error("Dashboard data fetch error:", err);
+      // Set default values on error
+      setStats({
+        totalReports: 0,
+        pendingReports: 0,
+        totalUsers: 0,
+        totalReviewers: 0
+      });
+      setRecentReports([]);
+      toast.error("Failed to load dashboard data. Using default values.");
     } finally {
       setLoading(false);
     }

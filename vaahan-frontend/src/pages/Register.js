@@ -56,23 +56,41 @@ const Register = () => {
 
     try {
       const response = await api.post("/auth/register", formData);
-      toast.success("Registration successful! Please verify your account.");
-      setStep(2); // Move to OTP verification step
+      
+      if (response.data.success) {
+        toast.success("Registration successful! Please verify your account.");
+        setStep(2); // Move to OTP verification step
+      } else {
+        toast.error(response.data.message || "Registration failed. Please try again.");
+      }
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || "Registration failed. Please try again."
-      );
+      console.error("Registration error:", err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   const handleResendOTP = async () => {
+    setOtpLoading(true);
     try {
-      await api.post("/auth/resend-otp", { username: formData.username });
-      toast.success("OTP resent successfully!");
+      const response = await api.post("/auth/resend-otp", { username: formData.username });
+      if (response.data.success) {
+        toast.success("OTP resent successfully!");
+      } else {
+        toast.error(response.data.message || "Failed to resend OTP. Please try again.");
+      }
     } catch (err) {
-      toast.error("Failed to resend OTP. Please try again.");
+      console.error("Resend OTP error:", err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          "Failed to resend OTP. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -80,12 +98,21 @@ const Register = () => {
     e.preventDefault();
     setOtpLoading(true);
     try {
-      await api.post("/auth/verify-otp", { username: formData.username, otp });
-      toast.success("Account verified successfully! Please login.");
-      setOtpVerified(true);
-      setTimeout(() => navigate("/login"), 1500);
+      const response = await api.post("/auth/verify-otp", { username: formData.username, otp });
+      
+      if (response.data.success) {
+        toast.success("Account verified successfully! Please login.");
+        setOtpVerified(true);
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        toast.error(response.data.message || "OTP verification failed. Please check your OTP and try again.");
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || "OTP verification failed. Please check your OTP and try again.");
+      console.error("OTP verification error:", err);
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.error || 
+                          "OTP verification failed. Please check your OTP and try again.";
+      toast.error(errorMessage);
     } finally {
       setOtpLoading(false);
     }

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.UUID;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -91,6 +92,12 @@ public class UserServiceImpl implements UserService {
     public boolean existsByUsername(String username) {
         log.debug("Checking if user exists with username: {}", username);
         return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public Optional<User> findByUsername(String username) {
+        log.debug("Finding user by username: {}", username);
+        return userRepository.findByUsername(username);
     }
 
     @Override

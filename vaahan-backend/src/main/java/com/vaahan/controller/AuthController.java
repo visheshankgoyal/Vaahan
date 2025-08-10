@@ -63,9 +63,9 @@ public class AuthController {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error("User not found"));
         } catch (Exception e) {
-            log.error("Unexpected error during login for user: {}", request.getUsername(), e);
+            log.error("Unexpected error during login for user: {} - Error: {}", request.getUsername(), e.getMessage(), e);
             return ResponseEntity.internalServerError()
-                    .body(ApiResponse.error("Login failed. Please try again later."));
+                    .body(ApiResponse.error("Login failed. Please try again later. Error: " + e.getMessage()));
         }
     }
 }

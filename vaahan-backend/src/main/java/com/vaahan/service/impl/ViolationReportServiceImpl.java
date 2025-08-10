@@ -1,18 +1,20 @@
 package com.vaahan.service.impl;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vaahan.dto.ViolationReportDTO;
 import com.vaahan.entities.ReportStatus;
 import com.vaahan.entities.ViolationReport;
+import com.vaahan.exception.FileStorageException;
 import com.vaahan.exception.ResourceNotFoundException;
 import com.vaahan.repository.ViolationReportRepository;
+import com.vaahan.service.FileStorageService;
 import com.vaahan.service.VCoinService;
 import com.vaahan.service.ViolationReportService;
 import com.vaahan.util.Mapper;
@@ -29,10 +31,47 @@ public class ViolationReportServiceImpl implements ViolationReportService {
     @Autowired
     private VCoinService vCoinService;
 
+    @Autowired
+    private FileStorageService fileStorageService;
+
     @Override
     public ViolationReport submitReport(ViolationReport report) {
         report.setStatus(ReportStatus.PENDING);
         return reportRepository.save(report);
+    }
+
+    @Override
+    public ViolationReport submitReport(ViolationReport report, MultipartFile image) {
+        log.info("Submitting violation report with image for user: {}", report.getUser().getUsername());
+        
+        try {
+            // Handle image upload
+            if (image != null && !image.isEmpty()) {
+                String fileName = fileStorageService.storeFile(image);
+                String imageUrl = fileStorageService.getFileUrl(fileName);
+                report.setImageUrl(imageUrl);
+                log.info("Image uploaded successfully: {}", fileName);
+            } else {
+                log.warn("No image provided for violation report");
+                report.setImageUrl("");
+            }
+            
+            // Set initial status
+            report.setStatus(ReportStatus.PENDING);
+            
+            // Save the report
+            ViolationReport savedReport = reportRepository.save(report);
+            
+            log.info("Violation report submitted successfully with ID: {}", savedReport.getReportId());
+            return savedReport;
+            
+        } catch (FileStorageException e) {
+            log.error("Failed to upload image for violation report: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to upload image: " + e.getMessage());
+        } catch (Exception e) {
+            log.error("Error submitting violation report: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to submit report: " + e.getMessage());
+        }
     }
 
     @Override

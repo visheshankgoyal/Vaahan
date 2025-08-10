@@ -87,10 +87,53 @@ public class UserRegistrationController {
     }
 
     @PostMapping("/verify-otp")
-    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<ApiResponse<String>> verifyOtp(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
         String otp = payload.get("otp");
-        boolean verified = otpService.verifyOtp(username, otp);
-        return verified ? ResponseEntity.ok("OTP verified") : ResponseEntity.badRequest().body("Invalid or expired OTP");
+        
+        log.info("OTP verification attempt for user: {}", username);
+        
+        try {
+            // First, get the user to find their email
+            User user = userService.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Verify OTP using email (since OTP is stored with email)
+            boolean verified = otpService.verifyOtp(user.getEmail(), otp);
+            if (verified) {
+                log.info("OTP verified successfully for user: {}", username);
+                return ResponseEntity.ok(ApiResponse.success("OTP verified successfully", "Account verified"));
+            } else {
+                log.warn("OTP verification failed for user: {}", username);
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("Invalid or expired OTP"));
+            }
+        } catch (Exception e) {
+            log.error("Error during OTP verification for user: {}", username, e);
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("OTP verification failed. Please try again."));
+        }
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<ApiResponse<String>> resendOtp(@RequestBody Map<String, String> payload) {
+        String username = payload.get("username");
+        
+        log.info("Resending OTP for user: {}", username);
+        
+        try {
+            // First, get the user to find their email
+            User user = userService.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Generate OTP using email
+            otpService.generateOtp(user.getEmail());
+            log.info("OTP resent successfully for user: {}", username);
+            return ResponseEntity.ok(ApiResponse.success("OTP resent successfully", "OTP sent"));
+        } catch (Exception e) {
+            log.error("Error resending OTP for user: {}", username, e);
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Failed to resend OTP. Please try again."));
+        }
     }
 } 

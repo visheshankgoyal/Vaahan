@@ -1,0 +1,62 @@
+### VAAHAN Authentication Flow Test
+
+### 1. Health Check
+GET http://localhost:8080/actuator/health
+
+### 2. Register a new user
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser123",
+  "email": "testuser123@example.com",
+  "password": "password123",
+  "firstName": "Test",
+  "lastName": "User",
+  "phone": "1234567890"
+}
+
+### 3. Fetch OTP for verification (for testing)
+POST http://localhost:8080/api/otp/fetch-otp
+Content-Type: application/x-www-form-urlencoded
+
+username=testuser123@example.com
+
+### 4. Verify OTP
+POST http://localhost:8080/api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "username": "testuser123",
+  "otp": "123456"
+}
+
+### 5. Login with the registered user
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser123",
+  "password": "password123"
+}
+
+### 6. Test with email login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser123@example.com",
+  "password": "password123"
+}
+
+### 7. Resend OTP
+POST http://localhost:8080/api/auth/resend-otp
+Content-Type: application/json
+
+{
+  "username": "testuser123"
+}
+
+### 8. Test admin endpoint (requires authentication)
+GET http://localhost:8080/api/admin/users
+Authorization: Bearer YOUR_JWT_TOKEN_HERE 
