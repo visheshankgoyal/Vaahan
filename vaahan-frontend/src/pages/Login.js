@@ -7,8 +7,7 @@ import { toast } from "react-toastify";
 const Login = () => {
   const [credentials, setCredentials] = useState({
     username: "",
-    password: "",
-    role: "USER" // Default role
+    password: ""
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -24,17 +23,14 @@ const Login = () => {
     
     try {
       const res = await api.post("/auth/login", credentials);
-      login(res.data.user, res.data.token);
+      // Backend returns { data: { success, message, data: { token } } }
+      const token = res.data.data.token;
+      // Optionally, fetch user info here or decode from token if needed
+      // For now, just store token and navigate
+      login({ username: credentials.username }, token);
       toast.success("Login successful!");
-
-      // Navigate based on user role
-      if (res.data.user.role === "ADMIN") {
-        navigate("/admin");
-      } else if (res.data.user.role === "REVIEWER") {
-        navigate("/reviewer");
-      } else {
-        navigate("/dashboard");
-      }
+      // Navigate to dashboard (role-based navigation can be added if user info is available)
+      navigate("/dashboard");
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed. Please check your credentials.");
     } finally {

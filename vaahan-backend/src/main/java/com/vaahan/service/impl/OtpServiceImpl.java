@@ -10,6 +10,8 @@ import com.vaahan.entities.Otp;
 import com.vaahan.repository.OtpRepository;
 import com.vaahan.service.EmailService;
 import com.vaahan.service.OtpService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OtpServiceImpl implements OtpService {
@@ -21,6 +23,7 @@ public class OtpServiceImpl implements OtpService {
     private EmailService emailService;
 
     private static final int OTP_EXPIRATION_MINUTES = 5;
+    private static final Logger logger = LoggerFactory.getLogger(OtpServiceImpl.class);
 
     @Override
     public void generateOtp(String username) {
@@ -35,8 +38,13 @@ public class OtpServiceImpl implements OtpService {
 
         otpRepository.save(otp);
 
-        // ✅ Send via email
-        emailService.sendOtpEmail(username, otpCode);
+        // Send OTP via email only
+        try {
+            emailService.sendOtpEmail(username, otpCode);
+            logger.info("OTP for {} is {} (for demo/testing)", username, otpCode);
+        } catch (Exception e) {
+            logger.error("Failed to send OTP email to {}: {}", username, e.getMessage(), e);
+        }
     }
 
     @Override

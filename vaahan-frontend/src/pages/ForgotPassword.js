@@ -11,13 +11,16 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       await api.post("/auth/forgot-password", { email });
       toast.success("Password reset link sent to your email!");
       setSubmitted(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to send reset link. Please try again.");
+      toast.error(
+        err.response?.data?.message ||
+          "Failed to send reset link. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -37,10 +40,14 @@ const ForgotPassword = () => {
                 </p>
                 <div className="alert alert-info">
                   <i className="fas fa-info-circle mr-2"></i>
-                  <strong>Next Steps:</strong><br/>
-                  1. Check your email inbox<br/>
-                  2. Click the password reset link<br/>
-                  3. Create a new password<br/>
+                  <strong>Next Steps:</strong>
+                  <br />
+                  1. Check your email inbox
+                  <br />
+                  2. Click the password reset link
+                  <br />
+                  3. Create a new password
+                  <br />
                   4. Login with your new password
                 </div>
                 <Link to="/login" className="btn btn-primary">
@@ -65,10 +72,11 @@ const ForgotPassword = () => {
                 <i className="fas fa-key fa-3x text-primary mb-3"></i>
                 <h2 className="card-title">Forgot Password?</h2>
                 <p className="text-muted">
-                  Enter your email address and we'll send you a link to reset your password.
+                  Enter your email address and we'll send you a link to reset
+                  your password.
                 </p>
               </div>
-              
+
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
                   <label htmlFor="email">
@@ -105,17 +113,20 @@ const ForgotPassword = () => {
                   )}
                 </button>
               </form>
-              
+
               <div className="text-center mt-4">
                 <p className="mb-0">
                   Remember your password?{" "}
-                  <Link to="/login" className="text-primary">Login here</Link>
+                  <Link to="/login" className="text-primary">
+                    Login here
+                  </Link>
                 </p>
               </div>
 
               <div className="alert alert-info mt-4">
                 <i className="fas fa-info-circle mr-2"></i>
-                <strong>Note:</strong> The password reset link will expire in 1 hour for security reasons.
+                <strong>Note:</strong> The password reset link will expire in 1
+                hour for security reasons.
               </div>
             </div>
           </div>
@@ -125,4 +136,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword; 
+export default ForgotPassword;

@@ -10,7 +10,7 @@ const UserDashboard = () => {
     totalReports: 0,
     pendingReports: 0,
     approvedReports: 0,
-    rejectedReports: 0
+    rejectedReports: 0,
   });
   const [recentReports, setRecentReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,9 +23,9 @@ const UserDashboard = () => {
     try {
       const [statsRes, reportsRes] = await Promise.all([
         api.get("/reports/user/stats"),
-        api.get("/reports/user/recent")
+        api.get("/reports/user/recent"),
       ]);
-      
+
       setStats(statsRes.data);
       setRecentReports(reportsRes.data);
     } catch (err) {
@@ -38,11 +38,11 @@ const UserDashboard = () => {
   const getStatusBadge = (status) => {
     const badges = {
       PENDING: "badge-warning",
-      APPROVED: "badge-success", 
+      APPROVED: "badge-success",
       REJECTED: "badge-danger",
-      UNDER_REVIEW: "badge-info"
+      UNDER_REVIEW: "badge-info",
     };
-    return `badge ${badges[status] || 'badge-secondary'}`;
+    return `badge ${badges[status] || "badge-secondary"}`;
   };
 
   if (loading) {
@@ -126,16 +126,31 @@ const UserDashboard = () => {
             </div>
             <div className="card-body">
               <div className="row">
-                <div className="col-md-6 mb-3">
-                  <Link to="/report" className="btn btn-primary btn-lg btn-block">
+                <div className="col-md-4 mb-3">
+                  <Link
+                    to="/report"
+                    className="btn btn-primary btn-lg btn-block"
+                  >
                     <i className="fas fa-plus mr-2"></i>
                     Report New Violation
                   </Link>
                 </div>
-                <div className="col-md-6 mb-3">
-                  <Link to="/my-reports" className="btn btn-outline-primary btn-lg btn-block">
+                <div className="col-md-4 mb-3">
+                  <Link
+                    to="/my-reports"
+                    className="btn btn-outline-primary btn-lg btn-block"
+                  >
                     <i className="fas fa-list mr-2"></i>
                     View All Reports
+                  </Link>
+                </div>
+                <div className="col-md-4 mb-3">
+                  <Link
+                    to="/profile"
+                    className="btn btn-outline-secondary btn-lg btn-block"
+                  >
+                    <i className="fas fa-user mr-2"></i>
+                    Profile
                   </Link>
                 </div>
               </div>
@@ -158,7 +173,9 @@ const UserDashboard = () => {
               {recentReports.length === 0 ? (
                 <div className="text-center py-4">
                   <i className="fas fa-inbox fa-3x text-muted mb-3"></i>
-                  <p className="text-muted">No reports yet. Start by reporting a violation!</p>
+                  <p className="text-muted">
+                    No reports yet. Start by reporting a violation!
+                  </p>
                   <Link to="/report" className="btn btn-primary">
                     Report Violation
                   </Link>
@@ -178,17 +195,19 @@ const UserDashboard = () => {
                     <tbody>
                       {recentReports.map((report) => (
                         <tr key={report.id}>
-                          <td>{new Date(report.createdAt).toLocaleDateString()}</td>
+                          <td>
+                            {new Date(report.createdAt).toLocaleDateString()}
+                          </td>
                           <td>{report.location}</td>
-                          <td>{report.violationType?.replace(/_/g, ' ')}</td>
+                          <td>{report.violationType?.replace(/_/g, " ")}</td>
                           <td>
                             <span className={getStatusBadge(report.status)}>
                               {report.status}
                             </span>
                           </td>
                           <td>
-                            <Link 
-                              to={`/my-reports/${report.id}`} 
+                            <Link
+                              to={`/my-reports/${report.id}`}
                               className="btn btn-sm btn-outline-primary"
                             >
                               <i className="fas fa-eye mr-1"></i>

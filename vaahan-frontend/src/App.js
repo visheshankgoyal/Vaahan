@@ -13,6 +13,7 @@ import AdminAllReports from "./pages/AdminAllReports";
 import UserDashboard from "./pages/UserDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ReviewerDashboard from "./pages/ReviewerDashboard";
+import Profile from "./pages/Profile";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./auth/AuthContext";
@@ -54,6 +55,14 @@ const App = () => {
             element={
               <ProtectedRoute allowedRoles={["USER"]}>
                 <ViewMyReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute allowedRoles={["USER", "ADMIN", "REVIEWER"]}>
+                <Profile />
               </ProtectedRoute>
             }
           />

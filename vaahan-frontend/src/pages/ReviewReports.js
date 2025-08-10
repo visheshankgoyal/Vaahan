@@ -30,9 +30,9 @@ const ReviewReports = () => {
     }
 
     try {
-      await api.post(`/reviewer/reports/${id}/review`, { 
+      await api.post(`/reviewer/reports/${id}/review`, {
         status,
-        comment: reviewComment 
+        comment: reviewComment,
       });
       toast.success(`Report ${status.toLowerCase()} successfully`);
       setReviewComment("");
@@ -46,20 +46,20 @@ const ReviewReports = () => {
   const getStatusBadge = (status) => {
     const badges = {
       PENDING: "badge-warning",
-      APPROVED: "badge-success", 
+      APPROVED: "badge-success",
       REJECTED: "badge-danger",
-      UNDER_REVIEW: "badge-info"
+      UNDER_REVIEW: "badge-info",
     };
-    return `badge ${badges[status] || 'badge-secondary'}`;
+    return `badge ${badges[status] || "badge-secondary"}`;
   };
 
   const getSeverityBadge = (severity) => {
     const badges = {
       LOW: "badge-success",
-      MEDIUM: "badge-warning", 
-      HIGH: "badge-danger"
+      MEDIUM: "badge-warning",
+      HIGH: "badge-danger",
     };
-    return `badge ${badges[severity] || 'badge-secondary'}`;
+    return `badge ${badges[severity] || "badge-secondary"}`;
   };
 
   if (loading) {
@@ -114,7 +114,8 @@ const ReviewReports = () => {
                             {new Date(report.createdAt).toLocaleDateString()}
                           </p>
                           <p className="card-text">
-                            <strong>Violation:</strong> {report.violationType?.replace(/_/g, ' ')}
+                            <strong>Violation:</strong>{" "}
+                            {report.violationType?.replace(/_/g, " ")}
                           </p>
                           {report.vehicleNumber && (
                             <p className="card-text">
@@ -122,45 +123,54 @@ const ReviewReports = () => {
                             </p>
                           )}
                           <p className="card-text">
-                            {report.description.length > 100 
-                              ? `${report.description.substring(0, 100)}...` 
-                              : report.description
-                            }
+                            {report.description.length > 100
+                              ? `${report.description.substring(0, 100)}...`
+                              : report.description}
                           </p>
                           <p className="card-text small text-muted">
                             <i className="fas fa-user mr-1"></i>
-                            Reported by: {report.reporter?.username || 'Unknown'}
+                            Reported by:{" "}
+                            {report.reporter?.username || "Unknown"}
                           </p>
                         </div>
                         <div className="card-footer">
                           <div className="d-flex justify-content-between mb-2">
-                            <button 
+                            <button
                               className="btn btn-sm btn-outline-primary"
                               onClick={() => setSelectedReport(report)}
                             >
                               <i className="fas fa-eye mr-1"></i>
                               View Details
                             </button>
-                            <button 
+                            <button
                               className="btn btn-sm btn-outline-info"
-                              onClick={() => window.open(`/reports/${report.id}`, '_blank')}
+                              onClick={() =>
+                                window.open(`/reports/${report.id}`, "_blank")
+                              }
                             >
                               <i className="fas fa-image mr-1"></i>
                               View Evidence
                             </button>
                           </div>
-                          
+
                           {/* Quick Actions */}
-                          <div className="btn-group btn-group-sm w-100" role="group">
+                          <div
+                            className="btn-group btn-group-sm w-100"
+                            role="group"
+                          >
                             <button
-                              onClick={() => handleReview(report.id, "APPROVED")}
+                              onClick={() =>
+                                handleReview(report.id, "APPROVED")
+                              }
                               className="btn btn-success"
                               title="Approve Report"
                             >
                               <i className="fas fa-check"></i>
                             </button>
                             <button
-                              onClick={() => handleReview(report.id, "REJECTED")}
+                              onClick={() =>
+                                handleReview(report.id, "REJECTED")
+                              }
                               className="btn btn-danger"
                               title="Reject Report"
                             >
@@ -177,7 +187,9 @@ const ReviewReports = () => {
                               <i className="fas fa-question"></i>
                             </button>
                             <button
-                              onClick={() => handleReview(report.id, "ESCALATE")}
+                              onClick={() =>
+                                handleReview(report.id, "ESCALATE")
+                              }
                               className="btn btn-dark"
                               title="Escalate to Admin"
                             >
@@ -197,7 +209,7 @@ const ReviewReports = () => {
 
       {/* Review Modal */}
       {selectedReport && (
-        <div className="modal fade show" style={{display: 'block'}}>
+        <div className="modal fade show" style={{ display: "block" }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
@@ -205,9 +217,9 @@ const ReviewReports = () => {
                   <i className="fas fa-clipboard-check mr-2"></i>
                   Review Report
                 </h5>
-                <button 
-                  type="button" 
-                  className="close" 
+                <button
+                  type="button"
+                  className="close"
                   onClick={() => setSelectedReport(null)}
                 >
                   <span>&times;</span>
@@ -220,36 +232,62 @@ const ReviewReports = () => {
                     <table className="table table-sm">
                       <tbody>
                         <tr>
-                          <td><strong>Location:</strong></td>
+                          <td>
+                            <strong>Location:</strong>
+                          </td>
                           <td>{selectedReport.location}</td>
                         </tr>
                         <tr>
-                          <td><strong>Violation Type:</strong></td>
-                          <td>{selectedReport.violationType?.replace(/_/g, ' ')}</td>
+                          <td>
+                            <strong>Violation Type:</strong>
+                          </td>
+                          <td>
+                            {selectedReport.violationType?.replace(/_/g, " ")}
+                          </td>
                         </tr>
                         <tr>
-                          <td><strong>Severity:</strong></td>
                           <td>
-                            <span className={getSeverityBadge(selectedReport.severity)}>
+                            <strong>Severity:</strong>
+                          </td>
+                          <td>
+                            <span
+                              className={getSeverityBadge(
+                                selectedReport.severity
+                              )}
+                            >
                               {selectedReport.severity}
                             </span>
                           </td>
                         </tr>
                         <tr>
-                          <td><strong>Vehicle Number:</strong></td>
-                          <td>{selectedReport.vehicleNumber || 'Not provided'}</td>
+                          <td>
+                            <strong>Vehicle Number:</strong>
+                          </td>
+                          <td>
+                            {selectedReport.vehicleNumber || "Not provided"}
+                          </td>
                         </tr>
                         <tr>
-                          <td><strong>Description:</strong></td>
+                          <td>
+                            <strong>Description:</strong>
+                          </td>
                           <td>{selectedReport.description}</td>
                         </tr>
                         <tr>
-                          <td><strong>Reporter:</strong></td>
+                          <td>
+                            <strong>Reporter:</strong>
+                          </td>
                           <td>{selectedReport.reporter?.username}</td>
                         </tr>
                         <tr>
-                          <td><strong>Date:</strong></td>
-                          <td>{new Date(selectedReport.createdAt).toLocaleString()}</td>
+                          <td>
+                            <strong>Date:</strong>
+                          </td>
+                          <td>
+                            {new Date(
+                              selectedReport.createdAt
+                            ).toLocaleString()}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -258,28 +296,34 @@ const ReviewReports = () => {
                     <h6>Review Actions</h6>
                     <div className="d-grid gap-2">
                       <button
-                        onClick={() => handleReview(selectedReport.id, "APPROVED")}
+                        onClick={() =>
+                          handleReview(selectedReport.id, "APPROVED")
+                        }
                         className="btn btn-success btn-sm"
                       >
                         <i className="fas fa-check mr-1"></i>
                         Approve
                       </button>
                       <button
-                        onClick={() => handleReview(selectedReport.id, "REJECTED")}
+                        onClick={() =>
+                          handleReview(selectedReport.id, "REJECTED")
+                        }
                         className="btn btn-danger btn-sm"
                       >
                         <i className="fas fa-times mr-1"></i>
                         Reject
                       </button>
                       <button
-                        onClick={() => handleReview(selectedReport.id, "ESCALATE")}
+                        onClick={() =>
+                          handleReview(selectedReport.id, "ESCALATE")
+                        }
                         className="btn btn-dark btn-sm"
                       >
                         <i className="fas fa-arrow-up mr-1"></i>
                         Escalate
                       </button>
                     </div>
-                    
+
                     <div className="mt-3">
                       <label htmlFor="reviewComment">Review Comment:</label>
                       <textarea
@@ -291,7 +335,9 @@ const ReviewReports = () => {
                         onChange={(e) => setReviewComment(e.target.value)}
                       ></textarea>
                       <button
-                        onClick={() => handleReview(selectedReport.id, "REQUEST_MORE_INFO")}
+                        onClick={() =>
+                          handleReview(selectedReport.id, "REQUEST_MORE_INFO")
+                        }
                         className="btn btn-warning btn-sm mt-2"
                         disabled={!reviewComment.trim()}
                       >
@@ -309,8 +355,8 @@ const ReviewReports = () => {
 
       {/* Modal Backdrop */}
       {selectedReport && (
-        <div 
-          className="modal-backdrop fade show" 
+        <div
+          className="modal-backdrop fade show"
           onClick={() => setSelectedReport(null)}
         ></div>
       )}

@@ -2,14 +2,18 @@ package com.vaahan.service.impl;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.UUID;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.vaahan.dto.User.UserDTO;
 import com.vaahan.entities.User;
 import com.vaahan.exception.ResourceNotFoundException;
 import com.vaahan.repository.UserRepository;
+import com.vaahan.service.EmailService;
 import com.vaahan.service.UserService;
 import com.vaahan.util.Mapper;
 
@@ -21,6 +25,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     @Override
     public UserDTO getUserById(Long id) {
@@ -81,6 +91,32 @@ public class UserServiceImpl implements UserService {
     public boolean existsByUsername(String username) {
         log.debug("Checking if user exists with username: {}", username);
         return userRepository.existsByUsername(username);
+    }
+
+    @Override
+    public void initiatePasswordReset(String email, String appUrl) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User with email not found"));
+        String token = UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+        String resetLink = appUrl + "/reset-password?token=" + token;
+        emailService.sendPasswordResetEmail(email, resetLink);
+    }
+
+    @Override
+    public boolean resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+            .orElseThrow(() -> new RuntimeException("Invalid or expired reset token"));
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+        return true;
     }
 }
 

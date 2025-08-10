@@ -49,6 +49,11 @@ public class User {
     @Column(length = 50)
     private String lastName;
 
+    @Column(length = 100)
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
+
     @Builder.Default
     @Enumerated(EnumType.STRING)
     private UserStatus accountStatus = UserStatus.ACTIVE;

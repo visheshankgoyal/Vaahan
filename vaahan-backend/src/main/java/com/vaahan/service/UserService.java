@@ -12,6 +12,8 @@ public interface UserService {
     User registerUser(User user);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
+    void initiatePasswordReset(String email, String appUrl);
+    boolean resetPassword(String token, String newPassword);
 }
 
 

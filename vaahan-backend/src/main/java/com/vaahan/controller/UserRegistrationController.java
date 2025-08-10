@@ -15,11 +15,14 @@ import com.vaahan.entities.User;
 import com.vaahan.entities.UserRole;
 import com.vaahan.entities.UserStatus;
 import com.vaahan.exception.UserAlreadyExistsException;
+import com.vaahan.service.OtpService;
 import com.vaahan.service.UserService;
 import com.vaahan.util.Mapper;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -31,6 +34,9 @@ public class UserRegistrationController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private OtpService otpService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponseDTO>> registerUser(
@@ -61,6 +67,8 @@ public class UserRegistrationController {
                     .build();
 
             User savedUser = userService.registerUser(user);
+            // Trigger OTP generation after registration
+            otpService.generateOtp(savedUser.getEmail());
             UserResponseDTO userResponse = Mapper.toUserResponseDTO(savedUser);
 
             log.info("User registered successfully: {}", savedUser.getEmail());
@@ -76,5 +84,13 @@ public class UserRegistrationController {
             return ResponseEntity.internalServerError()
                     .body(ApiResponse.error("Registration failed. Please try again later."));
         }
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> payload) {
+        String username = payload.get("username");
+        String otp = payload.get("otp");
+        boolean verified = otpService.verifyOtp(username, otp);
+        return verified ? ResponseEntity.ok("OTP verified") : ResponseEntity.badRequest().body("Invalid or expired OTP");
     }
 } 

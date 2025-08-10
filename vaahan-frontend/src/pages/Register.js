@@ -12,10 +12,13 @@ const Register = () => {
     confirmPassword: "",
     firstName: "",
     lastName: "",
-    role: "USER" // Default role
+    role: "USER", // Default role
   });
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // 1: Registration, 2: OTP Verification
+  const [otp, setOtp] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -31,7 +34,7 @@ const Register = () => {
       toast.error("Password must be at least 6 characters long!");
       return false;
     }
-    if (!formData.email.includes('@')) {
+    if (!formData.email.includes("@")) {
       toast.error("Please enter a valid email address!");
       return false;
     }
@@ -44,19 +47,21 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
 
     setLoading(true);
-    
+
     try {
       const response = await api.post("/auth/register", formData);
       toast.success("Registration successful! Please verify your account.");
       setStep(2); // Move to OTP verification step
     } catch (err) {
-      toast.error(err.response?.data?.message || "Registration failed. Please try again.");
+      toast.error(
+        err.response?.data?.message || "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -68,6 +73,21 @@ const Register = () => {
       toast.success("OTP resent successfully!");
     } catch (err) {
       toast.error("Failed to resend OTP. Please try again.");
+    }
+  };
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setOtpLoading(true);
+    try {
+      await api.post("/auth/verify-otp", { username: formData.username, otp });
+      toast.success("Account verified successfully! Please login.");
+      setOtpVerified(true);
+      setTimeout(() => navigate("/login"), 1500);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "OTP verification failed. Please check your OTP and try again.");
+    } finally {
+      setOtpLoading(false);
     }
   };
 
@@ -86,21 +106,62 @@ const Register = () => {
                   <i className="fas fa-shield-alt fa-3x text-primary mb-3"></i>
                   <h2 className="card-title">Verify Your Account</h2>
                   <p className="text-muted">
-                    We've sent verification codes to your email and phone number.
+                    We've sent a verification code to your email address.
                   </p>
                 </div>
-                
                 <div className="alert alert-info">
                   <i className="fas fa-info-circle mr-2"></i>
-                  <strong>Account Details:</strong><br/>
-                  <strong>Username:</strong> {formData.username}<br/>
-                  <strong>Email:</strong> {formData.email}<br/>
-                  <strong>Phone:</strong> {formData.phone}<br/>
+                  <strong>Account Details:</strong>
+                  <br />
+                  <strong>Username:</strong> {formData.username}
+                  <br />
+                  <strong>Email:</strong> {formData.email}
+                  <br />
                   <strong>Role:</strong> {formData.role}
                 </div>
-
+                {!otpVerified ? (
+                  <form onSubmit={handleVerifyOtp} className="mb-3">
+                    <div className="form-group">
+                      <label htmlFor="otp">Enter OTP</label>
+                      <input
+                        type="text"
+                        className="form-control form-control-lg text-center"
+                        id="otp"
+                        name="otp"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Enter 6-digit OTP"
+                        maxLength="6"
+                        required
+                        style={{ fontSize: '1.2rem', letterSpacing: '0.5rem' }}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="btn btn-success btn-lg btn-block"
+                      disabled={otpLoading || otp.length !== 6}
+                    >
+                      {otpLoading ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm mr-2"></span>
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-check mr-2"></i>
+                          Verify Account
+                        </>
+                      )}
+                    </button>
+                  </form>
+                ) : (
+                  <div className="alert alert-success text-center">
+                    <i className="fas fa-check-circle mr-2"></i>
+                    Account verified! Redirecting to login...
+                  </div>
+                )}
                 <div className="text-center">
-                  <button 
+                  <button
                     onClick={handleBackToRegister}
                     className="btn btn-outline-secondary btn-sm mb-3"
                   >
@@ -108,27 +169,28 @@ const Register = () => {
                     Back to Registration
                   </button>
                 </div>
-
                 <div className="text-center">
-                  <p className="text-muted mb-2">Check your email and SMS for verification codes</p>
-                  <button 
+                  <p className="text-muted mb-2">
+                    Didn't receive the OTP?
+                  </p>
+                  <button
                     onClick={handleResendOTP}
                     className="btn btn-outline-primary btn-sm"
                   >
                     <i className="fas fa-redo mr-1"></i>
-                    Resend Verification Codes
+                    Resend OTP
                   </button>
                 </div>
-
                 <div className="alert alert-success mt-4">
                   <i className="fas fa-check-circle mr-2"></i>
-                  <strong>Next Steps:</strong><br/>
-                  1. Check your email for verification link<br/>
-                  2. Check your phone for SMS verification code<br/>
-                  3. Click the verification link or enter the code<br/>
-                  4. Once verified, you can login to your account
+                  <strong>Next Steps:</strong>
+                  <br />
+                  1. Check your email for the verification code
+                  <br />
+                  2. Enter the code above
+                  <br />
+                  3. Once verified, you can login to your account
                 </div>
-
                 <div className="text-center mt-4">
                   <a href="/login" className="btn btn-primary">
                     <i className="fas fa-sign-in-alt mr-2"></i>
@@ -152,35 +214,12 @@ const Register = () => {
               <div className="text-center mb-4">
                 <i className="fas fa-user-plus fa-3x text-primary mb-3"></i>
                 <h2 className="card-title">Register for VAAHAN</h2>
-                <p className="text-muted">Create your account and choose your role</p>
+                <p className="text-muted">
+                  Create your account and choose your role
+                </p>
               </div>
-              
-              <form onSubmit={handleSubmit}>
-                {/* Role Selection */}
-                <div className="form-group">
-                  <label htmlFor="role">
-                    <i className="fas fa-user-tag mr-1"></i>
-                    Register As *
-                  </label>
-                  <select
-                    className="form-control"
-                    id="role"
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="USER">👤 Citizen User - Report traffic violations</option>
-                    <option value="REVIEWER">🔍 Traffic Reviewer - Review reports (Admin approval required)</option>
-                    <option value="ADMIN">⚙️ System Administrator - Manage platform (Special access required)</option>
-                  </select>
-                  <small className="form-text text-muted">
-                    {formData.role === "USER" && "Report traffic violations and track your submissions"}
-                    {formData.role === "REVIEWER" && "Review and validate submitted violation reports"}
-                    {formData.role === "ADMIN" && "Manage users, reports, and system administration"}
-                  </small>
-                </div>
 
+              <form onSubmit={handleSubmit}>
                 {/* Personal Information */}
                 <div className="row">
                   <div className="col-md-6">
@@ -220,7 +259,6 @@ const Register = () => {
                     </div>
                   </div>
                 </div>
-                
                 <div className="form-group">
                   <label htmlFor="username">
                     <i className="fas fa-at mr-1"></i>
@@ -237,7 +275,6 @@ const Register = () => {
                     required
                   />
                 </div>
-                
                 <div className="form-group">
                   <label htmlFor="email">
                     <i className="fas fa-envelope mr-1"></i>
@@ -257,7 +294,6 @@ const Register = () => {
                     Verification link will be sent to this email
                   </small>
                 </div>
-                
                 <div className="form-group">
                   <label htmlFor="phone">
                     <i className="fas fa-phone mr-1"></i>
@@ -268,16 +304,11 @@ const Register = () => {
                     className="form-control"
                     id="phone"
                     name="phone"
-                    placeholder="Enter phone number"
+                    placeholder="Enter phone number (optional)"
                     value={formData.phone}
                     onChange={handleChange}
-                    required
                   />
-                  <small className="form-text text-muted">
-                    SMS verification code will be sent to this number
-                  </small>
                 </div>
-                
                 <div className="form-group">
                   <label htmlFor="password">
                     <i className="fas fa-lock mr-1"></i>
@@ -297,7 +328,6 @@ const Register = () => {
                     Password must be at least 6 characters long
                   </small>
                 </div>
-
                 <div className="form-group">
                   <label htmlFor="confirmPassword">
                     <i className="fas fa-lock mr-1"></i>
@@ -314,7 +344,6 @@ const Register = () => {
                     required
                   />
                 </div>
-                
                 <button
                   type="submit"
                   className="btn btn-primary btn-lg btn-block"
@@ -333,22 +362,31 @@ const Register = () => {
                   )}
                 </button>
               </form>
-              
               <div className="text-center mt-4">
                 <p className="mb-0">
                   Already have an account?{" "}
-                  <a href="/login" className="text-primary">Login here</a>
+                  <a href="/login" className="text-primary">
+                    Login here
+                  </a>
                 </p>
               </div>
-
               {/* Registration Info */}
               <div className="alert alert-info mt-4">
                 <i className="fas fa-info-circle mr-2"></i>
-                <strong>Registration Process:</strong><br/>
-                1. Fill in your details and choose your role<br/>
-                2. Submit the form to create your account<br/>
-                3. Verify your email and phone number<br/>
+                <strong>Registration Process:</strong>
+                <br />
+                1. Fill in your details
+                <br />
+                2. Submit the form to create your account
+                <br />
+                3. Verify your email address
+                <br />
                 4. Login with your credentials
+                <br />
+                <br />
+                <strong>Note:</strong> Only users can register here. Admins and
+                reviewers must be created by an admin and can log in once their
+                account is set up.
               </div>
             </div>
           </div>
