@@ -1,244 +1,251 @@
-# Vaahan - Traffic Violation Reporting System
+# VAAHAN - Traffic Violation Reporting System
 
-A comprehensive Spring Boot application for reporting and managing traffic violations with role-based access control, file upload capabilities, and RESTful API endpoints.
+A comprehensive web application for reporting and managing traffic violations. Built with Spring Boot backend and React frontend.
 
 ## 🚀 Features
 
-- **User Authentication & Authorization**: JWT-based authentication with role-based access control
-- **Traffic Violation Reporting**: Submit reports with images and detailed information
-- **Role-Based Access Control**: Three user roles (USER, REVIEWER, ADMIN)
-- **File Upload**: Support for image uploads with validation
-- **Email Integration**: OTP verification system
-- **API Documentation**: Swagger/OpenAPI documentation
-- **Comprehensive Error Handling**: Global exception handling with detailed error responses
-- **Security**: CORS configuration, password encryption, and secure endpoints
+### For Citizens (Users)
+- Register and verify account via OTP
+- Report traffic violations with photo evidence
+- Track report status and history
+- Earn VCoins for valid reports
+- View personal dashboard
+
+### For Traffic Reviewers
+- Review submitted violation reports
+- Validate evidence and approve/reject reports
+- Manage report status
+- Access reviewer dashboard
+
+### For Administrators
+- Manage user accounts and roles
+- View all reports and statistics
+- Configure system settings
+- Manage VCoin distribution
 
 ## 🛠️ Technology Stack
 
-- **Backend**: Spring Boot 3.5.4 with Java 21
-- **Database**: MySQL 8.0
-- **Security**: Spring Security with JWT
-- **Documentation**: Swagger/OpenAPI 3.0
-- **Build Tool**: Maven
-- **Libraries**: Lombok, JPA/Hibernate, Validation API
+### Backend
+- **Spring Boot 3.2.5** - Main framework
+- **Spring Security** - Authentication & Authorization
+- **Spring Data JPA** - Database operations
+- **MySQL** - Database
+- **JWT** - Token-based authentication
+- **Spring Mail** - Email notifications
+- **Maven** - Dependency management
+
+### Frontend
+- **React 19.1.1** - UI framework
+- **React Router** - Navigation
+- **Axios** - HTTP client
+- **Bootstrap 4.6** - UI components
+- **React Toastify** - Notifications
 
 ## 📋 Prerequisites
 
 - Java 21 or higher
-- Maven 3.6+
-- MySQL 8.0+
-- Git
+- Node.js 16 or higher
+- MySQL 8.0 or higher
+- Maven 3.6 or higher
 
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
 ```bash
 git clone <repository-url>
-cd Vaahan
+cd VAAHAN-Project
 ```
 
 ### 2. Database Setup
-Create a MySQL database:
-```sql
-CREATE DATABASE vaahan;
-CREATE DATABASE vaahan_dev; -- for development
-```
+1. Create a MySQL database named `vaahan`
+2. Update database credentials in `vaahan-backend/src/main/resources/application.properties`
 
-### 3. Environment Configuration
-Create a `.env` file in the root directory:
-```env
-# Database Configuration
-DB_USERNAME=root
-DB_PASSWORD=your_password
-DATABASE_URL=jdbc:mysql://localhost:3303/vaahan
-
-# JWT Configuration
-JWT_SECRET=your_secure_jwt_secret_key_here
-JWT_EXPIRATION_MS=86400000
-
-# Email Configuration
-EMAIL_USERNAME=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-
-# File Upload
-FILE_UPLOAD_PATH=./uploads/
-
-# CORS Configuration
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4200
-CORS_ALLOWED_METHODS=GET,POST,PUT,DELETE,OPTIONS
-CORS_ALLOWED_HEADERS=*
-```
-
-### 4. Build and Run
+### 3. Backend Setup
 ```bash
-# Build the project
+cd vaahan-backend
+
+# Install dependencies
 mvn clean install
 
-# Run in development mode
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-
-# Run in production mode
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
+# Run the application
+mvn spring-boot:run
 ```
 
-### 5. Access the Application
-- **Application**: http://localhost:8080
-- **API Documentation**: http://localhost:8080/swagger-ui.html
-- **Health Check**: http://localhost:8080/actuator/health
+The backend will start on `http://localhost:8080`
 
-## 📚 API Documentation
+### 4. Frontend Setup
+```bash
+cd vaahan-frontend
 
-### Authentication Endpoints
-- `POST /api/auth/login` - User login
-- `POST /api/otp/generate` - Generate OTP
-- `POST /api/otp/verify` - Verify OTP
+# Install dependencies
+npm install
 
-### User Endpoints
-- `GET /api/user/profile` - Get user profile
-- `PUT /api/user/profile` - Update user profile
-- `GET /api/user/reports` - Get user's reports
+# Start development server
+npm start
+```
 
-### Violation Report Endpoints
-- `POST /api/reports` - Submit violation report
-- `POST /api/reports/with-image` - Submit report with image
-- `GET /api/reports/user/{userId}` - Get user's reports
-- `GET /api/reports/{reportId}` - Get specific report
+The frontend will start on `http://localhost:3000`
 
-### Reviewer Endpoints
-- `GET /api/reviewer/pending` - Get pending reports
-- `PUT /api/reviewer/status/{reportId}` - Update report status
+## 🔧 Configuration
 
-### Admin Endpoints
-- `GET /api/admin/users` - Get all users
-- `GET /api/admin/reports` - Get all reports
+### Backend Configuration
+Update `vaahan-backend/src/main/resources/application.properties`:
 
-### File Upload Endpoints
-- `POST /api/files/upload` - Upload file
-- `GET /api/files/{fileName}` - Download file
+```properties
+# Database
+spring.datasource.url=jdbc:mysql://localhost:3306/vaahan
+spring.datasource.username=your_username
+spring.datasource.password=your_password
 
-## 🔐 Security
+# JWT
+jwt.secret=your_jwt_secret_key
+jwt.expirationMs=86400000
 
-### User Roles
-1. **USER**: Can submit reports and view their own reports
-2. **REVIEWER**: Can review and approve/reject reports
-3. **ADMIN**: Full system access
+# Email (for OTP)
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your_email@gmail.com
+spring.mail.password=your_app_password
 
-### Security Features
-- JWT-based authentication
-- Role-based authorization
-- Password encryption with BCrypt
-- CORS configuration
-- Input validation
-- File upload security
+# CORS
+cors.allowed-origins=http://localhost:3000
+```
+
+### Frontend Configuration
+Update `vaahan-frontend/src/api/axiosConfig.js` if needed:
+
+```javascript
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+```
 
 ## 📁 Project Structure
 
 ```
-src/main/java/com/vaahan/
-├── config/                 # Configuration classes
-├── controller/            # REST controllers
-├── dto/                   # Data Transfer Objects
-├── entities/              # JPA entities
-├── exception/             # Custom exceptions and handlers
-├── repository/            # Data access layer
-├── security/              # Security configuration
-├── service/               # Business logic
-│   └── impl/             # Service implementations
-└── util/                  # Utility classes
+VAAHAN-Project/
+├── vaahan-backend/                 # Spring Boot Backend
+│   ├── src/main/java/com/vaahan/
+│   │   ├── config/                 # Configuration classes
+│   │   ├── controller/             # REST controllers
+│   │   ├── dto/                    # Data Transfer Objects
+│   │   ├── entities/               # JPA entities
+│   │   ├── repository/             # Data repositories
+│   │   ├── security/               # Security configuration
+│   │   ├── service/                # Business logic
+│   │   └── util/                   # Utility classes
+│   └── src/main/resources/
+│       └── application.properties  # Configuration
+├── vaahan-frontend/                # React Frontend
+│   ├── src/
+│   │   ├── api/                    # API configuration
+│   │   ├── auth/                   # Authentication context
+│   │   ├── components/             # Reusable components
+│   │   ├── pages/                  # Page components
+│   │   └── utils/                  # Utility functions
+│   └── package.json
+└── README.md
 ```
 
-## 🔧 Configuration
+## 🔐 Authentication Flow
 
-### Development Profile
-```properties
-spring.profiles.active=dev
-```
+1. **Registration**: User registers with email/phone → OTP sent → Account verified
+2. **Login**: Username/email + password → JWT token generated
+3. **Authorization**: Role-based access control (USER, REVIEWER, ADMIN)
 
-### Production Profile
-```properties
-spring.profiles.active=prod
-```
+## 📱 API Endpoints
 
-## 📊 Database Schema
+### Authentication
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/verify-otp` - OTP verification
+- `POST /api/auth/resend-otp` - Resend OTP
 
-### Key Entities
-- **User**: User accounts and authentication
-- **ViolationReport**: Traffic violation reports
-- **Violation**: Predefined violation types
-- **ViolationCategory**: Violation categories
-- **Otp**: Email verification
+### OTP Management
+- `POST /api/otp/generate` - Generate OTP
+- `POST /api/otp/verify` - Verify OTP
+- `POST /api/otp/fetch-otp` - Fetch OTP (testing)
 
-## 🚨 Error Handling
-
-The application includes comprehensive error handling:
-- Global exception handler
-- Custom exceptions
-- Validation error responses
-- File upload error handling
-- Security exception handling
-
-## 📝 Logging
-
-The application uses SLF4J with Logback for logging:
-- Request/response logging
-- Security event logging
-- File operation logging
-- Error logging
+### User Management
+- `GET /api/admin/users` - Get all users (Admin)
+- `POST /api/admin/create-user` - Create user (Admin)
 
 ## 🧪 Testing
 
+### Backend Testing
 ```bash
-# Run tests
+cd vaahan-backend
 mvn test
+```
 
-# Run with coverage
-mvn jacoco:report
+### Frontend Testing
+```bash
+cd vaahan-frontend
+npm test
 ```
 
 ## 🚀 Deployment
 
-### Docker Deployment
+### Backend Deployment
+1. Build the JAR file:
 ```bash
-# Build Docker image
-docker build -t vaahan .
-
-# Run container
-docker run -p 8080:8080 vaahan
+mvn clean package
 ```
 
-### Production Considerations
-1. Use environment variables for sensitive data
-2. Configure proper CORS settings
-3. Set up SSL/TLS
-4. Configure database connection pooling
-5. Set up monitoring and logging
-6. Configure backup strategies
+2. Run the JAR:
+```bash
+java -jar target/Vaahan-0.0.1-SNAPSHOT.jar
+```
+
+### Frontend Deployment
+1. Build for production:
+```bash
+npm run build
+```
+
+2. Serve the build folder using a web server like nginx or Apache.
+
+## 🔒 Security Features
+
+- JWT-based authentication
+- Role-based authorization
+- Password encryption (BCrypt)
+- CORS configuration
+- Input validation
+- SQL injection prevention
+
+## 📧 Email Configuration
+
+For OTP functionality, configure your email settings:
+
+1. Enable 2-factor authentication on your Gmail account
+2. Generate an App Password
+3. Update the email configuration in `application.properties`
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests
+4. Add tests if applicable
 5. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License.
 
 ## 🆘 Support
 
 For support and questions:
-- Email: support@vaahan.com
-- Documentation: http://localhost:8080/swagger-ui.html
-- Issues: Create an issue in the repository
+- Create an issue in the repository
+- Contact the development team
 
-## 🔄 Changelog
+## 🔄 Version History
 
-### Version 1.0.0
-- Initial release
-- Basic CRUD operations
-- JWT authentication
-- File upload support
-- API documentation
-- Comprehensive error handling 
+- **v1.0.0** - Initial release with basic functionality
+- Authentication and authorization
+- User registration with OTP
+- Traffic violation reporting
+- Role-based dashboards
+
+---
+
+**Note**: This is a development version. For production deployment, ensure proper security configurations and environment variables are set. 
